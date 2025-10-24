@@ -29,7 +29,7 @@ LIMIT=200
 for ENTRY in "${REPOS[@]}"; do
   IFS='|' read -r NUM REPO <<< "$ENTRY"
   echo "#### [$NUM] $REPO"
-  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --json number,title,url 2>/dev/null); then
+  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --search "-is:draft" --json number,title,url 2>/dev/null); then
     echo "  (Error: Failed to get PR via gh)"
     echo
     continue

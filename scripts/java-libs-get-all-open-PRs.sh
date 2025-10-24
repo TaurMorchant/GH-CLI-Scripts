@@ -2,6 +2,7 @@
 set -euo pipefail
 
 REPOS=(
+  "1.1|https://github.com/Netcracker/qubership-core-infra"
   "1.2|https://github.com/Netcracker/qubership-core-utils"
   "1.3|https://github.com/Netcracker/qubership-core-error-handling"
   "1.4|https://github.com/Netcracker/qubership-core-process-orchestrator"
@@ -32,7 +33,7 @@ LIMIT=200
 for ENTRY in "${REPOS[@]}"; do
   IFS='|' read -r NUM REPO <<< "$ENTRY"
   echo "#### [$NUM] $REPO"
-  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --json number,title,url 2>/dev/null); then
+  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --search "-is:draft" --json number,title,url 2>/dev/null); then
     echo "  (Error: Failed to get PR via gh)"
     echo
     continue
