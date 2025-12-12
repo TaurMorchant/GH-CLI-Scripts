@@ -7,7 +7,8 @@ if [[ "${1:-}" == "-a" ]]; then
 fi
 
 REPOS=(
-  "java-lib-1.1|https://github.com/Netcracker/qubership-core-infra"
+  "base-images|https://github.com/Netcracker/qubership-core-base-images"
+  "infra|https://github.com/Netcracker/qubership-core-infra"
   "java-lib-1.2|https://github.com/Netcracker/qubership-core-utils"
   "java-lib-1.3|https://github.com/Netcracker/qubership-core-error-handling"
   "java-lib-1.4|https://github.com/Netcracker/qubership-core-process-orchestrator"
@@ -59,6 +60,8 @@ REPOS=(
   "go-service-4|https://github.com/Netcracker/qubership-core-maas-agent"
   "go-service-5|https://github.com/Netcracker/qubership-core-paas-mediation"
   "go-service-6|https://github.com/Netcracker/qubership-core-site-management"
+  "other-1|https://github.com/Netcracker/qubership-core-ingress-gateway"
+  "other-2|https://github.com/Netcracker/qubership-core-bootstrap"
 )
 
 LIMIT=200
@@ -66,7 +69,7 @@ LIMIT=200
 for ENTRY in "${REPOS[@]}"; do
   IFS='|' read -r NUM REPO <<< "$ENTRY"
 
-  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --search "-is:draft" --json number,title,url 2>/dev/null); then
+  if ! JSON=$(gh pr list --repo "$REPO" --state open --limit "$LIMIT" --search "-is:draft" --json number,title,url,createdAt 2>/dev/null); then
     if [[ "$SHOW_ALL" == true ]]; then
       echo "#### [$NUM] $REPO"
       echo "  (Error: Failed to get PR via gh)"
@@ -88,6 +91,10 @@ for ENTRY in "${REPOS[@]}"; do
     continue
   fi
 
-  jq -r 'sort_by(.number)[] | "- PR \(.number): \(.title) — \(.url)"' <<<"$JSON"
+  jq -r '
+    sort_by(.number)[]
+    | "- [\(.createdAt | fromdateiso8601 | strftime("%d.%m.%Y %H:%M"))] PR \(.number): \(.title) — \(.url)"
+  ' <<<"$JSON"
+
   echo
 done
